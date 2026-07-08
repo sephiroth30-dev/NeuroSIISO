@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <div class="tarjeta">
+    <h2>Buscar paciente</h2>
+    <form action="/buscar" method="get">
+      <label for="documento">Número de documento:</label><br><br>
+      <input type="text" id="documento" name="documento" required autofocus
+             value="{{ documento or '' }}" placeholder="Ej.: 29957147">
+      <button type="submit">Buscar</button>
+    </form>
+  </div>
+{% endblock %}

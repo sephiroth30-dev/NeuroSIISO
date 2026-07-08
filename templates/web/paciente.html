@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block titulo %}Paciente {{ documento }} — NeuroFic{% endblock %}
+
+{% block contenido %}
+  <div class="acciones"><a href="/">← Nueva búsqueda</a></div>
+
+  <div class="tarjeta">
+    <h2>Datos del paciente (documento {{ documento }})</h2>
+    <dl class="ficha">
+      {% for nombre, valor in paciente %}
+        <dt>{{ nombre }}</dt><dd>{{ valor }}</dd>
+      {% endfor %}
+    </dl>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Historias clínicas ({{ total_historias }})</h2>
+    {% if total_historias == 0 %}
+      <div class="aviso">El paciente no tiene historias clínicas registradas.</div>
+    {% else %}
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              {% for encabezado in encabezados %}<th>{{ encabezado }}</th>{% endfor %}
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fila in filas %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                {% for valor in fila %}<td>{{ valor }}</td>{% endfor %}
+                <td><a class="boton" href="/historia/{{ documento }}/{{ loop.index0 }}">Ver PDF</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

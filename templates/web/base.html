@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Consulta de historias clínicas — NeuroFic{% endblock %}</title>
+  <style>
+    :root { --azul: #1c4e80; --gris: #f4f6f8; --borde: #d8dee5; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", Arial, sans-serif;
+      color: #222; background: var(--gris);
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+    header {
+      background: var(--azul); color: #fff; padding: 0.8rem 1.5rem;
+    }
+    header h1 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+    header a { color: #fff; text-decoration: none; }
+    main { flex: 1; padding: 1.5rem; max-width: 1100px; width: 100%; margin: 0 auto; }
+    footer {
+      padding: 0.6rem 1.5rem; font-size: 0.78rem; color: #667;
+      border-top: 1px solid var(--borde); background: #fff;
+    }
+    .tarjeta {
+      background: #fff; border: 1px solid var(--borde); border-radius: 8px;
+      padding: 1.2rem 1.5rem; margin-bottom: 1.2rem;
+    }
+    h2 { font-size: 1rem; color: var(--azul); margin-top: 0; }
+    .error {
+      background: #fdecea; border: 1px solid #f5c6c0; color: #92322a;
+      padding: 0.7rem 1rem; border-radius: 6px; margin-bottom: 1rem;
+    }
+    .aviso {
+      background: #fff8e1; border: 1px solid #ecd9a0; color: #7a5d00;
+      padding: 0.7rem 1rem; border-radius: 6px;
+    }
+    input[type="text"] {
+      padding: 0.55rem 0.7rem; font-size: 1rem; border: 1px solid var(--borde);
+      border-radius: 6px; width: 260px;
+    }
+    button, .boton {
+      display: inline-block; padding: 0.55rem 1.1rem; font-size: 0.95rem;
+      background: var(--azul); color: #fff; border: none; border-radius: 6px;
+      cursor: pointer; text-decoration: none;
+    }
+    button:hover, .boton:hover { background: #163e66; }
+    a { color: var(--azul); }
+    table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+    th, td { border: 1px solid var(--borde); padding: 0.45rem 0.6rem; text-align: left; }
+    th { background: var(--gris); font-weight: 600; }
+    tr:nth-child(even) td { background: #fafbfc; }
+    dl.ficha { display: grid; grid-template-columns: max-content 1fr; gap: 0.3rem 1rem; margin: 0; }
+    dl.ficha dt { font-weight: 600; color: #445; }
+    dl.ficha dd { margin: 0; }
+    .acciones { margin-bottom: 1rem; }
+    .tabla-scroll { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <header><h1><a href="/">NeuroFic — Consulta de historias clínicas (SIISO)</a></h1></header>
+  <main>{% block contenido %}{% endblock %}</main>
+  <footer>Uso interno · Solo lectura sobre la base migrada · Servido únicamente en localhost · Pendiente: autenticación y bitácora de accesos</footer>
+</body>
+</html>

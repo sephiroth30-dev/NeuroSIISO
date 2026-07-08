@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block titulo %}Historia {{ numero }} de {{ total_historias }} — paciente {{ documento }}{% endblock %}
+
+{% block contenido %}
+  <div class="acciones">
+    <a href="/buscar?documento={{ documento }}">← Volver al paciente</a> ·
+    <a href="/">Nueva búsqueda</a> ·
+    <a href="/historia/{{ documento }}/{{ indice }}?regenerar=1">Regenerar PDF</a>
+    &nbsp;&nbsp;<small>({{ nombre_archivo }})</small>
+  </div>
+  <iframe src="/pdf/{{ documento }}/{{ indice }}"
+          title="Historia clínica {{ numero }} del paciente {{ documento }}"
+          style="width: 100%; height: 82vh; border: 1px solid var(--borde); border-radius: 8px; background: #fff;">
+  </iframe>
+{% endblock %}

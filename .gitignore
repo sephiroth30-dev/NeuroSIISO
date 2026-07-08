@@ -1,0 +1,11 @@
+# Entorno y configuración local
+venv/
+.env
+
+# Caché de PDF generados por la interfaz web
+var/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
