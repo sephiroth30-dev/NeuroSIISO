@@ -8,16 +8,22 @@ Reutiliza la capa de datos ya validada (src.db, src.service) y el generador
 de PDF de la Fase 2 (src.pdf_render, a través de src.pdf_cache); aquí no hay
 SQL nuevo y la base solo se lee.
 
-Ejecución (desde la carpeta del proyecto, con el venv activo):
+Ejecución:
+- Solo este equipo:  iniciar_web.bat           (uvicorn en 127.0.0.1:8000)
+- Intranet:          iniciar_web_intranet.bat  (uvicorn en 0.0.0.0:8000)
 
-    py -m uvicorn app_web:app --host 127.0.0.1 --port 8000
+Luego abrir http://127.0.0.1:8000 (o la IP del equipo desde otra máquina).
 
-Luego abrir http://127.0.0.1:8000 en el navegador.
-
-Notas de seguridad:
-- Servir únicamente en localhost (127.0.0.1); no exponer a la red.
-- PENDIENTE (fase posterior): autenticación de usuarios y bitácora de accesos.
+Notas de seguridad (modo intranet SIN login, elegido por la IPS):
+- La app NO pide contraseña: cualquier equipo de la red interna puede consultar
+  cualquier paciente por documento. Usar solo en una red interna controlada.
+- Toda consulta queda en una bitácora pasiva (var/bitacora/accesos-AAAA-MM.csv):
+  fecha, IP del equipo, método, ruta y documento consultado. No la commitees:
+  var/ está en .gitignore y la bitácora contiene identificadores de pacientes.
 """
+import csv
+import threading
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -27,13 +33,54 @@ from fastapi.templating import Jinja2Templates
 from src.db import get_connection
 from src.pdf_cache import obtener_pdf_historia
 from src.service import obtener_historia_completa
-from src.web_utils import (campos_escalares, documento_valido,
-                           listar_historias, tabla_historias)
+from src.web_utils import (campos_escalares, documento_de_solicitud,
+                           documento_valido, linea_bitacora, listar_historias,
+                           tabla_historias)
 
 RAIZ = Path(__file__).resolve().parent
 plantillas = Jinja2Templates(directory=str(RAIZ / "templates" / "web"))
 
 app = FastAPI(title="NeuroFic — Consulta de historias clínicas SIISO")
+
+# ------------------------------------------------------------- bitácora
+# Registro pasivo de accesos (sin login). Sirve como rastro mínimo de quién
+# (por IP) consultó a qué paciente. Vive en var/, que está en .gitignore.
+BITACORA_DIR = RAIZ / "var" / "bitacora"
+_BITACORA_ENCABEZADO = ["momento", "ip", "metodo", "ruta", "documento", "estado"]
+_RUTAS_REGISTRABLES = ("/buscar", "/historia/", "/pdf/")
+_bitacora_candado = threading.Lock()
+
+
+def _registrar_bitacora(fila: list[str]) -> None:
+    """Anexa una fila a la bitácora mensual de accesos (CSV en var/bitacora/)."""
+    BITACORA_DIR.mkdir(parents=True, exist_ok=True)
+    archivo = BITACORA_DIR / f"accesos-{datetime.now():%Y-%m}.csv"
+    nuevo = not archivo.exists()
+    with _bitacora_candado, archivo.open("a", newline="", encoding="utf-8") as fh:
+        escritor = csv.writer(fh)
+        if nuevo:
+            escritor.writerow(_BITACORA_ENCABEZADO)
+        escritor.writerow(fila)
+
+
+@app.middleware("http")
+async def bitacora_de_accesos(request: Request, call_next):
+    """Registra cada consulta de paciente; nunca debe tumbar la respuesta."""
+    respuesta = await call_next(request)
+    ruta = request.url.path
+    if ruta.startswith(_RUTAS_REGISTRABLES):
+        documento = documento_de_solicitud(
+            ruta, request.query_params.get("documento", ""))
+        if documento:
+            try:
+                _registrar_bitacora(linea_bitacora(
+                    f"{datetime.now():%Y-%m-%d %H:%M:%S}",
+                    request.client.host if request.client else "",
+                    request.method, ruta, documento, respuesta.status_code))
+            except Exception:
+                pass  # la bitácora es best-effort; no interrumpe el servicio
+    return respuesta
+
 
 # Los manejadores son funciones síncronas a propósito: FastAPI las ejecuta en
 # un hilo aparte, requisito del API síncrono de Playwright usado en pdf_render.

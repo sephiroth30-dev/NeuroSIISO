@@ -134,3 +134,24 @@ def elegir_archivo_pdf(archivos: list[Path], historia, indice: int,
         "Ajuste elegir_archivo_pdf en src/web_utils.py según el nombre de "
         "archivo que produce generar_pdfs_de_paciente (src/pdf_render.py)."
     )
+
+
+# ---------------------------------------------------------------- bitácora
+def documento_de_solicitud(ruta: str, documento_query: str = "") -> str:
+    """Extrae el documento consultado a partir de la ruta o del query string.
+
+    Se usa para la bitácora de accesos. En /historia/<doc>/<i> y /pdf/<doc>/<i>
+    el documento es el primer segmento tras el prefijo; en /buscar viene como
+    parámetro 'documento'.
+    """
+    partes = [p for p in ruta.split("/") if p]
+    if len(partes) >= 2 and partes[0] in ("historia", "pdf"):
+        return partes[1]
+    return (documento_query or "").strip()
+
+
+def linea_bitacora(momento: str, ip: str, metodo: str, ruta: str,
+                   documento: str, estado) -> list[str]:
+    """Arma la fila (lista de campos) de un evento para la bitácora CSV."""
+    return [momento, ip or "", metodo or "", ruta or "", documento or "",
+            str(estado)]

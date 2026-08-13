@@ -11,9 +11,9 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.web_utils import (a_texto, campos_escalares, documento_valido,
-                           elegir_archivo_pdf, etiqueta, listar_historias,
-                           tabla_historias)
+from src.web_utils import (a_texto, campos_escalares, documento_de_solicitud,
+                           documento_valido, elegir_archivo_pdf, etiqueta,
+                           linea_bitacora, listar_historias, tabla_historias)
 
 
 # ------------------------------------------------------------- documento
@@ -131,3 +131,26 @@ def test_elegir_pdf_falla_con_mensaje_claro_si_no_puede_asociar():
     historia.id = None
     with pytest.raises(RuntimeError, match="web_utils"):
         elegir_archivo_pdf(archivos, historia, 0, 3)
+
+
+# ------------------------------------------------------------- bitácora
+def test_documento_de_solicitud_lo_toma_de_la_ruta():
+    assert documento_de_solicitud("/historia/29957147/0") == "29957147"
+    assert documento_de_solicitud("/pdf/CE12345/2") == "CE12345"
+
+
+def test_documento_de_solicitud_lo_toma_del_query_en_buscar():
+    assert documento_de_solicitud("/buscar", "29957147") == "29957147"
+    assert documento_de_solicitud("/buscar", "  1.234  ") == "1.234"
+
+
+def test_documento_de_solicitud_vacio_si_no_hay():
+    assert documento_de_solicitud("/") == ""
+    assert documento_de_solicitud("/buscar", "") == ""
+
+
+def test_linea_bitacora_arma_los_seis_campos():
+    fila = linea_bitacora("2026-08-13 10:00:00", "192.168.1.20", "GET",
+                          "/historia/29957147/0", "29957147", 200)
+    assert fila == ["2026-08-13 10:00:00", "192.168.1.20", "GET",
+                    "/historia/29957147/0", "29957147", "200"]
