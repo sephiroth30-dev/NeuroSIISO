@@ -1,5 +1,8 @@
 # Dependencias adicionales de la interfaz web de consulta.
 # El resto del proyecto ya usa jinja2, pyodbc, python-dotenv y playwright
-# (ver requirements.txt del proyecto en C:\NeuroficMigracion).
+# (ver requirements.txt del proyecto original).
 fastapi>=0.115
 uvicorn>=0.30
+
+# Para correr tests/test_interfaz_web.py
+pytest>=8.0
